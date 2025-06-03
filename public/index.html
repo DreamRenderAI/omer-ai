@@ -160,7 +160,7 @@
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            overflow: visible;
+            overflow: auto;
         }
         .user-message {
             color: white;
@@ -187,7 +187,7 @@
             overflow-wrap: break-word;
             max-width: 90%;
             align-self: flex-start;
-            word-spacing: 6px;
+            word-spacing: 2px;
             transition: color 0.3s ease;
         }
         .light-theme .ai-message {
@@ -199,33 +199,42 @@
             align-self: flex-start;
         }
         .image-message img {
-            width: 200px;
-            height: 200px;
+            width: 300px;
+            height: 300px;
             object-fit: cover;
             border-radius: 8px;
             display: block;
-            transition: background-color 0.3s ease;
         }
-.image-placeholder {
-    width: 200px; /* Match image-message img width */
-    height: 200px; /* Match image-message img height */
-    background-color: #ffffff; /* White background */
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 15px 10px;
-    align-self: flex-start;
-    color: #000000; /* Black text */
-    font-size: 14px;
-    text-align: center;
-    padding: 10px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-.light-theme .image-placeholder {
-    background-color: #ffffff; /* White background for light theme */
-    color: #000000; /* Black text */
-}
+        .image-message.error {
+            color: white;
+            font-size: 14px;
+            text-align: left;
+            margin: 15px 10px;
+            align-self: flex-start;
+        }
+        .light-theme .image-message.error {
+            color: #333333;
+        }
+        .loading-icon {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #ffffff;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px 10px;
+            align-self: flex-start;
+            display: block !important;
+            z-index: 1;
+        }
+        .light-theme .loading-icon {
+            border: 3px solid #333333;
+            border-top: 3px solid transparent;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .input-container {
             width: 100%;
             max-width: 800px;
@@ -257,7 +266,7 @@
             color: #d3d3d3;
             font-size: 16px;
             margin-bottom: 5px;
-            font-family: 'Inter', 'Inter Fallback', Roboto, 'Open Sans', Arial, sans-serif;
+            font-family: 'Inter', 'Inter Fallback', Arial, sans-serif;
             font-weight: 400;
             transition: color 0.3s ease;
         }
@@ -272,7 +281,7 @@
             background: none;
             outline: none;
             white-space: pre-wrap;
-            font-family: 'Inter', 'Inter Fallback', Roboto, 'Open Sans', Arial, sans-serif;
+            font-family: 'Inter', 'Inter Fallback', Arial, sans-serif;
             font-weight: 400;
             transition: color 0.3s ease;
         }
@@ -301,14 +310,29 @@
             align-items: center;
             color: #000000;
             font-size: 36px;
-            font-weight: 900;
+            font-weight: bold;
             padding: 0;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .light-theme .circle-button {
             background-color: #333333;
             color: #ffffff;
         }
+
+        .loading-icon {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 12px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
     </style>
 </head>
 <body>
@@ -320,11 +344,11 @@
             <div class="dropdown-menu" id="dropdownMenu">
                 <div class="dropdown-item">Free User</div>
                 <button class="dropdown-button" onclick="newChat()">New Chat</button>
-                <button class="dropdown-button" id="themeButton" onclick="toggleTheme()">Switch to Light Theme</button>
+                <button class="dropdown-button" id="theme-button" onclick="toggleTheme()">Switch to Light Theme</button>
             </div>
         </div>
     </div>
-    <div class="title" id="title">Bixx AI By Omer AI</div>
+    <div class="title" id="title">Bixx AI By Omer</div>
     <div class="message-container" id="messageContainer"></div>
     <div class="input-container" id="inputContainer">
         <label class="input-label" for="userInput">Ask Bixx Anything</label>
@@ -340,94 +364,123 @@
     const title = document.getElementById('title');
     const inputContainer = document.getElementById('inputContainer');
     const dropdownMenu = document.getElementById('dropdownMenu');
-    const themeButton = document.getElementById('themeButton');
+    const themeButton = document.getElementById('theme-button');
+
     let messageSent = false;
     let currentAiMessageDiv = null;
-    let currentImagePlaceholder = null;
+    let currentLoadingIcon = null;
 
     ws.onopen = () => {
-        console.log('Connected to WebSocket server');
+        console.log('✅ WebSocket connected');
     };
 
 ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('Received WebSocket message:', data); // Debug log for all messages
+    try {
+        const data = JSON.parse(event.data);
+        console.log('📨 Incoming:', data);
 
-    if (data.role === 'user') {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'user-message';
-        messageDiv.textContent = data.content;
-        messageContainer.appendChild(messageDiv);
-        currentAiMessageDiv = null;
-        currentImagePlaceholder = null;
-        console.log('Appended user message:', data.content); // Debug log
-    } else if (data.role === 'ai') {
-        // Filter out _prompt: <text>_ completely
-        const filteredContent = data.content.replace(/_?prompt: ?[^_]+_?/g, '').trim();
-        console.log('AI chunk:', data.content, 'Filtered:', filteredContent); // Debug log
-        if (filteredContent) {
-            if (!currentAiMessageDiv) {
-                currentAiMessageDiv = document.createElement('div');
-                currentAiMessageDiv.className = 'ai-message';
-                messageContainer.appendChild(currentAiMessageDiv);
-                console.log('Created new AI message div'); // Debug log
+        if (data.role === 'user') {
+            currentAiMessageDiv = null;
+            console.log('👤 User message (server-echo):', data.content);
+
+        } else if (data.role === 'ai') {
+            let content = data.content;
+            let displayText = content;
+            let showLoading = false;
+
+            const promptIndex = content.indexOf('_prompt');
+            if (promptIndex !== -1) {
+                displayText = content.substring(0, promptIndex).trim();
+                showLoading = true;
             }
-            const currentText = currentAiMessageDiv.textContent;
-            if (currentText && !currentText.endsWith(' ') && !filteredContent.startsWith(' ') && !/[\.\?!,\)]$/.test(currentText)) {
-                currentAiMessageDiv.textContent += ' ' + filteredContent;
-            } else {
-                currentAiMessageDiv.textContent += filteredContent;
+
+            // Show spinner if AI says it will generate image
+            if (showLoading && !currentLoadingIcon) {
+                currentLoadingIcon = document.createElement('div');
+                currentLoadingIcon.className = 'loading-icon';
+                messageContainer.appendChild(currentLoadingIcon);
             }
-        }
-        // Add placeholder if prompt is detected
-        if (data.content.match(/_?prompt: ?[^_]+_?/)) {
-            if (!currentImagePlaceholder) {
-                currentImagePlaceholder = document.createElement('div');
-                currentImagePlaceholder.className = 'image-placeholder';
-                currentImagePlaceholder.textContent = 'Generated image';
-                messageContainer.appendChild(currentImagePlaceholder);
-                console.log('Appended image placeholder with text "Generated image"'); // Debug log
-                // Verify placeholder styles
-                console.log('Placeholder styles:', window.getComputedStyle(currentImagePlaceholder));
+
+            if (displayText.length > 0) {
+                if (currentLoadingIcon) {
+                    currentLoadingIcon.remove();
+                    currentLoadingIcon = null;
+                }
+
+                if (!currentAiMessageDiv) {
+                    currentAiMessageDiv = document.createElement('div');
+                    currentAiMessageDiv.className = 'ai-message';
+                    messageContainer.appendChild(currentAiMessageDiv);
+                }
+
+                currentAiMessageDiv.textContent += displayText;
             }
+
+        } else if (data.role === 'image') {
+            // Image is ready: remove spinner immediately
+            if (currentLoadingIcon) {
+                currentLoadingIcon.remove();
+                currentLoadingIcon = null;
+            }
+
+            const imageDiv = document.createElement('div');
+            imageDiv.className = 'image-message';
+
+            const img = document.createElement('img');
+            img.src = data.content;
+            img.alt = 'Generated image';
+            Object.assign(img.style, {
+                width: '300px',
+                height: '300px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                display: 'block'
+            });
+
+            img.onload = () => console.log('✅ Image loaded');
+            img.onerror = () => {
+                console.error('❌ Failed to load image');
+                imageDiv.textContent = 'Image failed to load!';
+                imageDiv.className = 'image-message error';
+            };
+
+            imageDiv.appendChild(img);
+            messageContainer.appendChild(imageDiv);
         }
-    } else if (data.role === 'image') {
-        if (currentImagePlaceholder) {
-            currentImagePlaceholder.remove();
-            currentImagePlaceholder = null;
-            console.log('Removed image placeholder'); // Debug log
+
+        if (!messageSent && data.role !== 'image') {
+            messageSent = true;
+            title.classList.add('hidden');
+            inputContainer.classList.add('moved-down');
+            console.log('🔽 Input moved down');
         }
-        const imageDiv = document.createElement('div');
-        imageDiv.className = 'image-message';
-        const img = document.createElement('img');
-        img.src = data.content;
-        img.alt = 'Generated image';
-        img.onerror = () => {
-            console.error('Failed to load image:', data.content);
-            imageDiv.textContent = 'Image failed to load, bro!';
-        };
-        imageDiv.appendChild(img);
-        messageContainer.appendChild(imageDiv);
-        console.log('Appended image:', data.content); // Debug log
+
+        scrollToBottom();
+    } catch (error) {
+        console.error('❗ Error parsing message:', error);
     }
-
-    if (!messageSent && data.role !== 'image') {
-        messageSent = true;
-        title.classList.add('hidden');
-        inputContainer.classList.add('moved-down');
-        console.log('Moved input container down'); // Debug log
-    }
-
-    window.scrollTo(0, document.body.scrollHeight);
 };
+
+
     function sendMessage() {
         const input = document.getElementById('userInput');
-        if (input.value.trim() === '') return;
+        const message = input.value.trim();
+        if (!message) return;
 
-        const message = input.value.replace(/\n+/g, ' ').trim();
-        ws.send(message);
+        const userMessage = message.replace(/\n+/g, ' ').trim();
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'user-message';
+        messageDiv.textContent = userMessage;
+        messageContainer.appendChild(messageDiv);
+
+        ws.send(userMessage);
         input.value = '';
         dropdownMenu.classList.remove('active');
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
     function toggleDropdown() {
@@ -440,29 +493,29 @@ ws.onmessage = (event) => {
         title.classList.remove('hidden');
         inputContainer.classList.remove('moved-down');
         currentAiMessageDiv = null;
-        currentImagePlaceholder = null;
+        currentLoadingIcon = null;
         dropdownMenu.classList.remove('active');
-        window.scrollTo(0, 0);
+        scrollToBottom();
     }
 
     function toggleTheme() {
         document.body.classList.toggle('light-theme');
-        const isLightTheme = document.body.classList.contains('light-theme');
-        themeButton.textContent = isLightTheme ? 'Switch to Dark Theme' : 'Switch to Light Theme';
+        const isLight = document.body.classList.contains('light-theme');
+        themeButton.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
         dropdownMenu.classList.remove('active');
     }
 
-    document.getElementById('userInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', (e) => {
         if (!e.target.closest('.profile-container')) {
             dropdownMenu.classList.remove('active');
         }
     });
 </script>
+
+
 </body>
 </html>

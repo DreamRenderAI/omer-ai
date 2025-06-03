@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const fs = require('fs');
 const path = require('path');
 const Cerebras = require('@cerebras/cerebras_cloud_sdk');
+const https = require('https');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -21,6 +22,33 @@ const server = app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 const wss = new WebSocket.Server({ server });
+
+// Function to convert image URL to base64
+async function getBase64FromUrl(url) {
+    return new Promise((resolve, reject) => {
+        https.get(url, (response) => {
+            if (response.statusCode !== 200) {
+                reject(new Error(`Failed to fetch image: ${response.statusCode}`));
+                return;
+            }
+
+            const chunks = [];
+            response.on('data', (chunk) => chunks.push(chunk));
+            response.on('end', () => {
+                const buffer = Buffer.concat(chunks);
+                const base64 = buffer.toString('base64');
+                const mimeType = response.headers['content-type'];
+                const base64Data = `data:${mimeType};base64,${base64}`;
+                
+                // Log the base64 data in the console
+                console.log('Image converted to base64:');
+                console.log(base64Data);
+                
+                resolve(base64Data);
+            });
+        }).on('error', reject);
+    });
+}
 
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
@@ -89,8 +117,20 @@ wss.on('connection', (ws) => {
                 const imagePrompt = promptMatch[0].replace(/_?prompt: ?/, '').replace(/_$/, '').trim();
                 const seed = Math.floor(Math.random() * 1000000000) + 1;
                 const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?nologo=true&seed=${seed}`;
-                console.log('Image URL:', imageUrl);
-                ws.send(JSON.stringify({ role: 'image', content: imageUrl }));
+                console.log('Fetching image from URL:', imageUrl);
+                
+                try {
+                    // Fetch and convert image to base64
+                    const base64Image = await getBase64FromUrl(imageUrl);
+                    console.log('Successfully converted image to base64');
+                    
+                    // Send base64 image to client
+                    ws.send(JSON.stringify({ role: 'image', content: base64Image }));
+                    console.log('Base64 image sent to client');
+                } catch (error) {
+                    console.error('Error converting image to base64:', error);
+                    ws.send(JSON.stringify({ role: 'ai', content: 'Sorry, I encountered an error while generating the image!' }));
+                }
             }
         } catch (error) {
             console.error('Error with Cerebras API or file:', error);

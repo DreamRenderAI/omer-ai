@@ -15,17 +15,19 @@
             flex-direction: column;
             font-family: 'Inter', 'Inter Fallback', Roboto, 'Open Sans', Arial, sans-serif;
             font-weight: 400;
-            overflow-y: auto;
+            overflow: hidden;
             scrollbar-width: thin;
             scrollbar-color: #242628 #161618;
             transition: background-color 0.3s ease;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+        html {
+            height: 100%;
         }
         body.light-theme {
             background-color: #ffffff;
             scrollbar-color: #e0e0e0 #f5f5f5;
-        }
-        body::-webkit-scrollbar {
-            width: 8px;
         }
         body::-webkit-scrollbar-track {
             background: #161618;
@@ -56,6 +58,8 @@
             background-color: #161618;
             z-index: 11;
             transition: background-color 0.3s ease;
+            flex-shrink: 0;
+            height: 60px;
         }
         .header.light-theme {
             background-color: #ffffff;
@@ -140,11 +144,11 @@
             font-family: 'Inter', 'Inter Fallback', Roboto, 'Open Sans', Arial, sans-serif;
             font-weight: 300;
             position: absolute;
-            top: 20%;
+            top: 35%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
         }
         .light-theme .title {
             color: #333333;
@@ -152,21 +156,83 @@
         .title.hidden {
             display: none;
         }
+        .example-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            position: absolute;
+            bottom: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        .example-buttons.hidden {
+            display: none;
+        }
+        .example-button {
+            background: linear-gradient(145deg, #2a2c2e, #242628);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            justify-content: center;
+        }
+        .example-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, #2c2e30, #26282a);
+        }
+        .example-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .light-theme .example-button {
+            background: linear-gradient(145deg, #e8e8e8, #d8d8d8);
+            color: #333333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .light-theme .example-button:hover {
+            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .button-icon {
+            font-size: 16px;
+            opacity: 0.9;
+        }
         .message-container {
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 40px 20px 150px;
+            padding: 0 20px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            overflow: auto;
+            overflow-y: auto;
+            position: relative;
+            gap: 20px;
+            padding-bottom: 150px;
+            padding-top: 60px;
         }
         .user-message {
             color: white;
             font-size: 16px;
             text-align: right;
-            margin: 15px 10px;
+            margin: 0;
             overflow-wrap: break-word;
             max-width: 90%;
             align-self: flex-end;
@@ -174,6 +240,8 @@
             padding: 10px 15px;
             border-radius: 15px;
             transition: color 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         .light-theme .user-message {
             color: #333333;
@@ -183,41 +251,96 @@
             color: white;
             font-size: 16px;
             text-align: left;
-            margin: 15px 10px;
+            margin: 0;
             overflow-wrap: break-word;
             max-width: 90%;
             align-self: flex-start;
             word-spacing: 2px;
             transition: color 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         .light-theme .ai-message {
             color: #333333;
         }
-        .image-message {
-            margin: 15px 10px;
-            max-width: 90%;
-            align-self: flex-start;
+        /* Style for the container holding image or loader within AI message */
+        .ai-message .flex-1 {
+            position: relative; /* Needed for absolute positioning of image and loader */
+            min-height: 250px; /* Ensure there's space for loader/smaller image */
+            display: flex; /* Use flex to potentially center smaller images/loaders */
+            justify-content: center;
+            align-items: center;
+            min-width: 260px; /* Ensure enough width for the image */
         }
-        .image-message img {
-            width: 300px;
-            height: 300px;
+        .ai-message img {
+            width: 250px; /* Set a fixed width for the image */
+            height: 250px; /* Set a fixed height for the image */
             object-fit: cover;
             border-radius: 8px;
             display: block;
+            position: absolute; /* Position relative within flex container */
+            top: 50%;
+            left: 75%; /* Position from the left edge, moving it right */
+            right: auto; /* Remove right positioning */
+            transform: translate(-50%, -50%); /* Keep centered relative to new left */
+            z-index: 2; /* Ensure image is above loader */
+        }
+        .ai-message .loader {
+            width: 80px; /* Make loader smaller than the image */
+            aspect-ratio: 1;
+            position: absolute; /* Position absolutely within flex-1 container */
+            top: 50%;
+            left: 75%; /* Position from the left edge, moving it right */
+            right: auto; /* Remove right positioning */
+            transform: translate(-50%, -50%); /* Keep centered relative to new left */
+            z-index: 1; /* Ensure loader is behind the image */
+        }
+        .image-message {
+            margin: 0;
+            max-width: 90%;
+            align-self: flex-start;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #242628;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .image-message img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         .image-message.error {
             color: white;
             font-size: 14px;
             text-align: left;
-            margin: 15px 10px;
+            margin: 0;
             align-self: flex-start;
+            padding: 10px 15px;
+            background-color: #242628;
+            border-radius: 8px;
+        }
+        .light-theme .image-message {
+            background-color: #e0e0e0;
         }
         .light-theme .image-message.error {
             color: #333333;
+            background-color: #e0e0e0;
         }
         .loading-icon {
-            width: 24px;
-            height: 24px;
+            width: 40px;
+            height: 40px;
             border: 3px solid #ffffff;
             border-top: 3px solid transparent;
             border-radius: 50%;
@@ -235,10 +358,56 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .loader {
+            width: 80px;
+            aspect-ratio: 1;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        .loader:before,
+        .loader:after {
+            content: "";
+            position: absolute;
+            border-radius: 50px;
+            box-shadow: 0 0 0 3px inset #fff;
+            animation: l4 2.5s infinite;
+        }
+        @keyframes l4 {
+            0% {
+                inset: 0 35px 35px 0;
+            }
+            12.5% {
+                inset: 0 35px 0 0;
+            }
+            25% {
+                inset: 35px 35px 0 0;
+            }
+            37.5% {
+                inset: 35px 0 0 0;
+            }
+            50% {
+                inset: 35px 0 0 35px;
+            }
+            62.5% {
+                inset: 0 0 0 35px;
+            }
+            75% {
+                inset: 0 0 35px 35px;
+            }
+            87.5% {
+                inset: 0 0 35px 0;
+            }
+            100% {
+                inset: 0 35px 35px 0;
+            }
+        }
         .input-container {
             width: 100%;
             max-width: 800px;
-            height: 130px;
+            height: 100px;
             background-color: #242628;
             border-radius: 25px;
             display: flex;
@@ -247,20 +416,19 @@
             padding: 15px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             position: fixed;
-            top: 50%;
+            bottom: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, 50%);
             z-index: 10;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+        }
+        .input-container.moved-down {
+            bottom: 0px;
+            transform: translateX(-50%);
         }
         .light-theme .input-container {
             background-color: #e0e0e0;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-        .input-container.moved-down {
-            top: auto;
-            bottom: 0;
-            transform: translateX(-50%);
         }
         .input-label {
             color: #d3d3d3;
@@ -312,31 +480,23 @@
             font-size: 36px;
             font-weight: bold;
             padding: 0;
+            border: none;
+            cursor: pointer;
+        }
+        .circle-button img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
         }
         .light-theme .circle-button {
             background-color: #333333;
             color: #ffffff;
         }
-
-        .loading-icon {
-  border: 4px solid #f3f3f3; /* Light grey */
-  border-top: 4px solid #3498db; /* Blue */
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  animation: spin 1s linear infinite;
-  margin: 12px auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
     </style>
 </head>
 <body>
     <div class="header">
+        <div class="loader"></div>
         <div class="profile-container">
             <div class="profile-icon" onclick="toggleDropdown()">
                 <i class="fas fa-user"></i>
@@ -354,8 +514,24 @@
         <label class="input-label" for="userInput">Ask Bixx Anything</label>
         <input type="text" class="input-text" id="userInput">
         <div class="button-group">
-            <button onclick="sendMessage()"><span class="circle-button">↑</span></button>
+            <button onclick="sendMessage()" class="circle-button">
+                <img src="up-arrow.png" alt="Send">
+            </button>
         </div>
+    </div>
+    <div class="example-buttons" id="exampleButtons">
+        <button class="example-button" onclick="useExamplePrompt('Generate me an image of a futuristic city')">
+            <i class="fas fa-image button-icon"></i>
+            Generate Image
+        </button>
+        <button class="example-button" onclick="useExamplePrompt('Write me a Python script to sort a list')">
+            <i class="fas fa-code button-icon"></i>
+            Code Example
+        </button>
+        <button class="example-button" onclick="useExamplePrompt('Explain quantum computing in simple terms')">
+            <i class="fas fa-brain button-icon"></i>
+            Learn Something
+        </button>
     </div>
 
 <script>
@@ -365,104 +541,187 @@
     const inputContainer = document.getElementById('inputContainer');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const themeButton = document.getElementById('theme-button');
+    const userInput = document.getElementById('userInput');
+    const sendButton = document.querySelector('.circle-button');
 
     let messageSent = false;
     let currentAiMessageDiv = null;
-    let currentLoadingIcon = null;
+    let isWaitingForResponse = false;
+    let isWaitingForImage = false;
+
+    // Hide loader initially
+    const topLoader = document.querySelector('.header .loader');
+    if(topLoader) topLoader.style.display = 'none';
+
+    function disableInput() {
+        userInput.disabled = true;
+        sendButton.style.opacity = '0.5';
+        sendButton.style.cursor = 'not-allowed';
+    }
+
+    function enableInput() {
+        userInput.disabled = false;
+        sendButton.style.opacity = '1';
+        sendButton.style.cursor = 'pointer';
+    }
 
     ws.onopen = () => {
-        console.log('✅ WebSocket connected');
+        console.log('Cooked By Omer AI🔥');
     };
 
-ws.onmessage = (event) => {
-    try {
-        const data = JSON.parse(event.data);
-        console.log('📨 Incoming:', data);
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
 
-        if (data.role === 'user') {
-            currentAiMessageDiv = null;
-            console.log('👤 User message (server-echo):', data.content);
+            if (data.role === 'user') {
+                currentAiMessageDiv = null;
+                isWaitingForResponse = true;
+                disableInput();
+                scrollToBottom();
 
-        } else if (data.role === 'ai') {
-            let content = data.content;
-            let displayText = content;
-            let showLoading = false;
+            } else if (data.role === 'ai') {
+                let content = data.content;
+                let displayText = content;
+                let showLoading = false;
 
-            const promptIndex = content.indexOf('_prompt');
-            if (promptIndex !== -1) {
-                displayText = content.substring(0, promptIndex).trim();
-                showLoading = true;
-            }
+                const promptIndex = content.indexOf('_prompt');
+                if (promptIndex !== -1) {
+                    displayText = content.substring(0, promptIndex).trim();
+                    showLoading = true;
+                    isWaitingForImage = true;
 
-            // Show spinner if AI says it will generate image
-            if (showLoading && !currentLoadingIcon) {
-                currentLoadingIcon = document.createElement('div');
-                currentLoadingIcon.className = 'loading-icon';
-                messageContainer.appendChild(currentLoadingIcon);
-            }
+                    // Create an AI message element for image generation status
+                    const aiMessageElement = document.createElement('div');
+                    aiMessageElement.className = 'message-bubble ai-message image-generating'; // Add a class to identify it
+                    aiMessageElement.innerHTML = `
+                        <div class="flex items-start gap-4">
+                          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-blue-200 font-medium">B</div>
+                          <div class="flex-1">
+                            <div class="whitespace-pre-wrap text-sm">Generating image...</div>
+                            <div class="loader"></div>
+                          </div>
+                        </div>
+                    `;
+                    messageContainer.appendChild(aiMessageElement);
+                    // Scroll to show the generating message after a short delay
+                    setTimeout(scrollToBottom, 50);
 
-            if (displayText.length > 0) {
-                if (currentLoadingIcon) {
-                    currentLoadingIcon.remove();
-                    currentLoadingIcon = null;
                 }
 
-                if (!currentAiMessageDiv) {
-                    currentAiMessageDiv = document.createElement('div');
-                    currentAiMessageDiv.className = 'ai-message';
-                    messageContainer.appendChild(currentAiMessageDiv);
+                if (displayText.length > 0 && !showLoading) { // Only process as text if not an image prompt
+                    if (!currentAiMessageDiv) {
+                        currentAiMessageDiv = document.createElement('div');
+                        currentAiMessageDiv.className = 'ai-message';
+                        messageContainer.appendChild(currentAiMessageDiv);
+                    }
+                    currentAiMessageDiv.textContent += displayText;
+                    scrollToBottom(); // Scroll to new text immediately after adding
                 }
 
-                currentAiMessageDiv.textContent += displayText;
+                if (!showLoading) { // If this AI message is not an image prompt
+                     isWaitingForResponse = false;
+                     if (!isWaitingForImage) { // Only enable input if no image is pending
+                         enableInput();
+                     }
+                 }
+
+
+            } else if (data.role === 'image') {
+                // Find the last AI message element marked for image generation
+                const aiMessageElements = messageContainer.querySelectorAll('.ai-message.image-generating');
+                const lastAiMessageElement = aiMessageElements[aiMessageElements.length - 1];
+
+                if (lastAiMessageElement) {
+                    const contentDiv = lastAiMessageElement.querySelector('.flex-1');
+                    if (contentDiv) {
+                         // Remove the generating text, KEEP the loader
+                         const loaderDiv = contentDiv.querySelector('.loader');
+                         contentDiv.innerHTML = ''; // Clear content but will re-add loader below
+                         if (loaderDiv) { // Re-append loader
+                            contentDiv.appendChild(loaderDiv);
+                         }
+
+                         const img = document.createElement('img');
+                         img.src = data.content;
+                         img.alt = '      '; // Added alt text back for accessibility
+                         Object.assign(img.style, {
+                             maxWidth: '100%',
+                             borderRadius: '8px',
+                             marginTop: '0', // Adjust margin to fit with loader
+                             position: 'absolute', // Position image absolutely within the flex-1 container
+                             top: '50%',
+                             left: '50%',
+                             transform: 'translate(-50%, -50%)',
+                             zIndex: '2' // Ensure image is above loader (z-index 1)
+                         });
+
+                         // Add click handler to open base64 image in new tab
+                         img.onclick = function() {
+                             const newWindow = window.open();
+                             newWindow.document.write(`
+                                 <html>
+                                 <head>
+                                     <title>Generated Image</title>
+                                     <style>
+                                         body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
+                                         img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                                     </style>
+                                 </head>
+                                 <body>
+                                     <img src="${data.content}" alt="Generated Image">
+                                 </body>
+                                 </html>
+                             `);
+                         };
+                         img.style.cursor = 'pointer'; // Add pointer cursor to indicate clickable
+
+                         img.onload = () => {
+                             isWaitingForImage = false; // Image finished loading
+                             if (!isWaitingForResponse) {
+                                 enableInput(); // Enable input if AI text response is also done
+                             }
+                             scrollToBottom(); // Scroll to show the loaded image
+                         };
+
+                         img.onerror = () => {
+                              contentDiv.textContent = 'Image failed to load!';
+                             lastAiMessageElement.classList.remove('image-generating'); // Remove the generating class
+                             lastAiMessageElement.classList.add('image-error'); // Add an error class if needed for styling
+                             isWaitingForImage = false; // Image failed, stop waiting
+                             if (!isWaitingForResponse) {
+                                 enableInput(); // Enable input
+                             }
+                             scrollToBottom(); // Scroll even if image fails to load
+                         };
+
+                         contentDiv.appendChild(img);
+                         lastAiMessageElement.classList.remove('image-generating'); // Image generation complete
+                         // No need to scroll here, onload/onerror will handle it
+                    }
+                }
             }
 
-        } else if (data.role === 'image') {
-            // Image is ready: remove spinner immediately
-            if (currentLoadingIcon) {
-                currentLoadingIcon.remove();
-                currentLoadingIcon = null;
+            if (!messageSent && data.role !== 'image') {
+                messageSent = true;
+                title.classList.add('hidden');
+                inputContainer.classList.add('moved-down');
+                 // Scroll to ensure input is visible after moving down
+                 scrollToBottom();
             }
-
-            const imageDiv = document.createElement('div');
-            imageDiv.className = 'image-message';
-
-            const img = document.createElement('img');
-            img.src = data.content;
-            img.alt = 'Generated image';
-            Object.assign(img.style, {
-                width: '300px',
-                height: '300px',
-                objectFit: 'cover',
-                borderRadius: '8px',
-                display: 'block'
-            });
-
-            img.onload = () => console.log('✅ Image loaded');
-            img.onerror = () => {
-                console.error('❌ Failed to load image');
-                imageDiv.textContent = 'Image failed to load!';
-                imageDiv.className = 'image-message error';
-            };
-
-            imageDiv.appendChild(img);
-            messageContainer.appendChild(imageDiv);
+        } catch (error) {
+            enableInput(); // Ensure input is enabled on error
         }
+    };
 
-        if (!messageSent && data.role !== 'image') {
-            messageSent = true;
-            title.classList.add('hidden');
-            inputContainer.classList.add('moved-down');
-            console.log('🔽 Input moved down');
-        }
-
-        scrollToBottom();
-    } catch (error) {
-        console.error('❗ Error parsing message:', error);
+    function scrollToBottom() {
+        const messageContainer = document.getElementById('messageContainer');
+        // Use smooth behavior for smoother scrolling
+        messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: 'smooth' });
     }
-};
-
 
     function sendMessage() {
+        if (isWaitingForResponse || isWaitingForImage) return;
+
         const input = document.getElementById('userInput');
         const message = input.value.trim();
         if (!message) return;
@@ -476,11 +735,21 @@ ws.onmessage = (event) => {
         ws.send(userMessage);
         input.value = '';
         dropdownMenu.classList.remove('active');
-        scrollToBottom();
+
+        // Hide example buttons when first message is sent
+        const exampleButtons = document.getElementById('exampleButtons');
+        if (exampleButtons) {
+            exampleButtons.classList.add('hidden');
+        }
+
+        // Scroll to bottom after a short delay to ensure the message is added
+        setTimeout(scrollToBottom, 100);
     }
 
-    function scrollToBottom() {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    function useExamplePrompt(prompt) {
+        const input = document.getElementById('userInput');
+        input.value = prompt;
+        input.focus();
     }
 
     function toggleDropdown() {
@@ -492,8 +761,11 @@ ws.onmessage = (event) => {
         messageSent = false;
         title.classList.remove('hidden');
         inputContainer.classList.remove('moved-down');
+        const exampleButtons = document.getElementById('exampleButtons');
+        if (exampleButtons) {
+            exampleButtons.classList.remove('hidden');
+        }
         currentAiMessageDiv = null;
-        currentLoadingIcon = null;
         dropdownMenu.classList.remove('active');
         scrollToBottom();
     }
@@ -506,7 +778,9 @@ ws.onmessage = (event) => {
     }
 
     document.getElementById('userInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter' && !isWaitingForResponse && !isWaitingForImage) {
+            sendMessage();
+        }
     });
 
     document.addEventListener('click', (e) => {
@@ -514,6 +788,10 @@ ws.onmessage = (event) => {
             dropdownMenu.classList.remove('active');
         }
     });
+
+     // Initial scroll to bottom on page load
+     scrollToBottom();
+
 </script>
 
 

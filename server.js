@@ -58,8 +58,17 @@ wss.on('connection', (ws) => {
                 const content = chunk.choices[0]?.delta?.content || '';
                 console.log('Raw chunk:', content);
                 if (content) {
-                    // Send AI response chunk to client
-                    ws.send(JSON.stringify({ role: 'ai', content: content }));
+                    // Remove _prompt: part from the content before sending to client
+                    let visibleContent = content;
+                    if (content.includes('_prompt:')) {
+                        visibleContent = content.split('_prompt:')[0].trim();
+                    }
+                    
+                    // Only send if there's visible content
+                    if (visibleContent) {
+                        ws.send(JSON.stringify({ role: 'ai', content: visibleContent }));
+                    }
+                    
                     // Append chunk to full response
                     fullResponse += content;
                     // Check for prompt in chunk

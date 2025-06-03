@@ -535,7 +535,11 @@
     </div>
 
 <script>
-    const ws = new WebSocket('ws://localhost:3000');
+    // Get the current host and protocol
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}`);
+    
     const messageContainer = document.getElementById('messageContainer');
     const title = document.getElementById('title');
     const inputContainer = document.getElementById('inputContainer');

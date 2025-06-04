@@ -263,14 +263,36 @@
         .light-theme .ai-message {
             color: #333333;
         }
-        /* Style for the container holding image or loader within AI message */
+        /* Style for the container holding image, loader, or placeholder within AI message */
         .ai-message .flex-1 {
-            position: relative; /* Needed for absolute positioning of image and loader */
-            min-height: 250px; /* Ensure there's space for loader/smaller image */
+            position: relative; /* Needed for absolute positioning of image, loader, and placeholder */
+            min-height: 250px; /* Ensure there's space for loader/placeholder/image */
             display: flex; /* Use flex to potentially center smaller images/loaders */
             justify-content: center;
             align-items: center;
             min-width: 260px; /* Ensure enough width for the image */
+        }
+        .ai-message .placeholder {
+            width: 250px; /* Match image size */
+            height: 250px; /* Match image size */
+            background-color: #666666; /* Gray placeholder */
+            border-radius: 8px;
+            position: absolute;
+            top: 50%;
+            left: 75%; /* Position from the left edge, moving it right */
+            right: auto; /* Remove right positioning */
+            transform: translate(-50%, -50%);
+            z-index: 0; /* Behind loader and image */
+        }
+        .ai-message .loader {
+            width: 80px; /* Make loader smaller than the image */
+            aspect-ratio: 1;
+            position: absolute; /* Position absolutely within flex-1 container */
+            top: 50%;
+            left: 75%; /* Position from the left edge, moving it right */
+            right: auto; /* Remove right positioning */
+            transform: translate(-50%, -50%); /* Keep centered relative to new left */
+            z-index: 1; /* Ensure loader is above placeholder but below image */
         }
         .ai-message img {
             width: 250px; /* Set a fixed width for the image */
@@ -283,17 +305,7 @@
             left: 75%; /* Position from the left edge, moving it right */
             right: auto; /* Remove right positioning */
             transform: translate(-50%, -50%); /* Keep centered relative to new left */
-            z-index: 2; /* Ensure image is above loader */
-        }
-        .ai-message .loader {
-            width: 80px; /* Make loader smaller than the image */
-            aspect-ratio: 1;
-            position: absolute; /* Position absolutely within flex-1 container */
-            top: 50%;
-            left: 75%; /* Position from the left edge, moving it right */
-            right: auto; /* Remove right positioning */
-            transform: translate(-50%, -50%); /* Keep centered relative to new left */
-            z-index: 1; /* Ensure loader is behind the image */
+            z-index: 2; /* Ensure image is above loader and placeholder */
         }
         .image-message {
             margin: 0;
@@ -596,111 +608,116 @@
 
                     // Create an AI message element for image generation status
                     const aiMessageElement = document.createElement('div');
-                    aiMessageElement.className = 'message-bubble ai-message image-generating'; // Add a class to identify it
+                    aiMessageElement.className = 'message-bubble ai-message image-generating';
                     aiMessageElement.innerHTML = `
                         <div class="flex items-start gap-4">
                           <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-blue-200 font-medium">B</div>
                           <div class="flex-1">
                             <div class="whitespace-pre-wrap text-sm">Generating image...</div>
+                            <div class="placeholder"></div>
                             <div class="loader"></div>
                           </div>
                         </div>
                     `;
                     messageContainer.appendChild(aiMessageElement);
-                    // Scroll to show the generating message after a short delay
                     setTimeout(scrollToBottom, 50);
 
                 }
 
-                if (displayText.length > 0 && !showLoading) { // Only process as text if not an image prompt
+                if (displayText.length > 0 && !showLoading) {
                     if (!currentAiMessageDiv) {
                         currentAiMessageDiv = document.createElement('div');
                         currentAiMessageDiv.className = 'ai-message';
                         messageContainer.appendChild(currentAiMessageDiv);
                     }
                     currentAiMessageDiv.textContent += displayText;
-                    scrollToBottom(); // Scroll to new text immediately after adding
+                    scrollToBottom();
                 }
 
-                if (!showLoading) { // If this AI message is not an image prompt
-                     isWaitingForResponse = false;
-                     if (!isWaitingForImage) { // Only enable input if no image is pending
-                         enableInput();
-                     }
-                 }
-
+                if (!showLoading) {
+                    isWaitingForResponse = false;
+                    if (!isWaitingForImage) {
+                        enableInput();
+                    }
+                }
 
             } else if (data.role === 'image') {
-                // Find the last AI message element marked for image generation
                 const aiMessageElements = messageContainer.querySelectorAll('.ai-message.image-generating');
                 const lastAiMessageElement = aiMessageElements[aiMessageElements.length - 1];
 
                 if (lastAiMessageElement) {
                     const contentDiv = lastAiMessageElement.querySelector('.flex-1');
                     if (contentDiv) {
-                         // Remove the generating text, KEEP the loader
-                         const loaderDiv = contentDiv.querySelector('.loader');
-                         contentDiv.innerHTML = ''; // Clear content but will re-add loader below
-                         if (loaderDiv) { // Re-append loader
+                        const loaderDiv = contentDiv.querySelector('.loader');
+                        const placeholderDiv = contentDiv.querySelector('.placeholder');
+                        contentDiv.innerHTML = '';
+                        if (placeholderDiv) {
+                            contentDiv.appendChild(placeholderDiv);
+                        }
+                        if (loaderDiv) {
                             contentDiv.appendChild(loaderDiv);
-                         }
+                        }
 
-                         const img = document.createElement('img');
-                         img.src = data.content;
-                         img.alt = '      '; // Added alt text back for accessibility
-                         Object.assign(img.style, {
-                             maxWidth: '100%',
-                             borderRadius: '8px',
-                             marginTop: '0', // Adjust margin to fit with loader
-                             position: 'absolute', // Position image absolutely within the flex-1 container
-                             top: '50%',
-                             left: '50%',
-                             transform: 'translate(-50%, -50%)',
-                             zIndex: '2' // Ensure image is above loader (z-index 1)
-                         });
+                        const img = document.createElement('img');
+                        img.src = data.content;
+                        img.alt = '\u200B';
+                        Object.assign(img.style, {
+                            maxWidth: '100%',
+                            borderRadius: '8px',
+                            marginTop: '0',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '75%',
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: '2'
+                        });
 
-                         // Add click handler to open base64 image in new tab
-                         img.onclick = function() {
-                             const newWindow = window.open();
-                             newWindow.document.write(`
-                                 <html>
-                                 <head>
-                                     <title>Generated Image</title>
-                                     <style>
-                                         body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
-                                         img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-                                     </style>
-                                 </head>
-                                 <body>
-                                     <img src="${data.content}" alt="Generated Image">
-                                 </body>
-                                 </html>
-                             `);
-                         };
-                         img.style.cursor = 'pointer'; // Add pointer cursor to indicate clickable
+                        img.onclick = function() {
+                            const newWindow = window.open();
+                            newWindow.document.write(`
+                                <html>
+                                <head>
+                                    <title>Generated Image</title>
+                                    <style>
+                                        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
+                                        img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <img src="${data.content}" alt="\u200B">
+                                </body>
+                                </html>
+                            `);
+                        };
+                        img.style.cursor = 'pointer';
 
-                         img.onload = () => {
-                             isWaitingForImage = false; // Image finished loading
-                             if (!isWaitingForResponse) {
-                                 enableInput(); // Enable input if AI text response is also done
-                             }
-                             scrollToBottom(); // Scroll to show the loaded image
-                         };
+                        img.onload = () => {
+                            if (placeholderDiv) {
+                                placeholderDiv.remove();
+                            }
+                            isWaitingForImage = false;
+                            if (!isWaitingForResponse) {
+                                enableInput();
+                            }
+                            scrollToBottom();
+                        };
 
-                         img.onerror = () => {
-                              contentDiv.textContent = 'Image failed to load!';
-                             lastAiMessageElement.classList.remove('image-generating'); // Remove the generating class
-                             lastAiMessageElement.classList.add('image-error'); // Add an error class if needed for styling
-                             isWaitingForImage = false; // Image failed, stop waiting
-                             if (!isWaitingForResponse) {
-                                 enableInput(); // Enable input
-                             }
-                             scrollToBottom(); // Scroll even if image fails to load
-                         };
+                        img.onerror = () => {
+                            contentDiv.textContent = 'Image failed to load!';
+                            lastAiMessageElement.classList.remove('image-generating');
+                            lastAiMessageElement.classList.add('image-error');
+                            if (placeholderDiv) {
+                                placeholderDiv.remove();
+                            }
+                            isWaitingForImage = false;
+                            if (!isWaitingForResponse) {
+                                enableInput();
+                            }
+                            scrollToBottom();
+                        };
 
-                         contentDiv.appendChild(img);
-                         lastAiMessageElement.classList.remove('image-generating'); // Image generation complete
-                         // No need to scroll here, onload/onerror will handle it
+                        contentDiv.appendChild(img);
+                        lastAiMessageElement.classList.remove('image-generating');
                     }
                 }
             }
@@ -709,17 +726,15 @@
                 messageSent = true;
                 title.classList.add('hidden');
                 inputContainer.classList.add('moved-down');
-                 // Scroll to ensure input is visible after moving down
-                 scrollToBottom();
+                scrollToBottom();
             }
         } catch (error) {
-            enableInput(); // Ensure input is enabled on error
+            enableInput();
         }
     };
 
     function scrollToBottom() {
         const messageContainer = document.getElementById('messageContainer');
-        // Use smooth behavior for smoother scrolling
         messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: 'smooth' });
     }
 
@@ -740,13 +755,11 @@
         input.value = '';
         dropdownMenu.classList.remove('active');
 
-        // Hide example buttons when first message is sent
         const exampleButtons = document.getElementById('exampleButtons');
         if (exampleButtons) {
             exampleButtons.classList.add('hidden');
         }
 
-        // Scroll to bottom after a short delay to ensure the message is added
         setTimeout(scrollToBottom, 100);
     }
 
@@ -793,11 +806,7 @@
         }
     });
 
-     // Initial scroll to bottom on page load
-     scrollToBottom();
-
+    scrollToBottom();
 </script>
-
-
 </body>
 </html>

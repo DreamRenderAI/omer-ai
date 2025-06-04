@@ -116,7 +116,7 @@ wss.on('connection', (ws) => {
                 console.log('Prompt detected:', promptMatch[0]);
                 const imagePrompt = promptMatch[0].replace(/_?prompt: ?/, '').replace(/_$/, '').trim();
                 const seed = Math.floor(Math.random() * 1000000000) + 1;
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?nologo=true&seed=${seed}`;
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?nologo=true&safe=true&seed=${seed}`;
                 console.log('Fetching image from URL:', imageUrl);
                 
                 try {

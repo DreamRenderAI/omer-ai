@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bixx AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -263,49 +263,67 @@
         .light-theme .ai-message {
             color: #333333;
         }
-        /* Style for the container holding image, loader, or placeholder within AI message */
+        .ai-message strong {
+            font-weight: 1000 !important;
+            font-weight: bold !important;
+            color: inherit;
+        }
+        .ai-message em {
+            font-style: italic;
+            color: inherit;
+        }
+        .ai-message code {
+            font-family: monospace;
+            background-color: rgba(255,255,255,0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .light-theme .ai-message code {
+            background-color: rgba(0,0,0,0.1);
+        }
         .ai-message .flex-1 {
-            position: relative; /* Needed for absolute positioning of image, loader, and placeholder */
-            min-height: 250px; /* Ensure there's space for loader/placeholder/image */
-            display: flex; /* Use flex to potentially center smaller images/loaders */
+            position: relative;
+            min-height: 250px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            min-width: 260px; /* Ensure enough width for the image */
+            min-width: 260px;
         }
         .ai-message .placeholder {
-            width: 250px; /* Match image size */
-            height: 250px; /* Match image size */
-            background-color: #303133; /* Gray placeholder */
+            width: 250px;
+            height: 250px;
+            background-color: #303133;
             border-radius: 8px;
             position: absolute;
             top: 50%;
-            left: 50%; /* Position from the left edge, moving it right */
-            right: auto; /* Remove right positioning */
+            left: 50%;
+            right: auto;
             transform: translate(-50%, -50%);
-            z-index: 0; /* Behind loader and image */
+            z-index: 0;
         }
         .ai-message .loader {
-            width: 80px; /* Make loader smaller than the image */
+            width: 80px;
             aspect-ratio: 1;
-            position: absolute; /* Position absolutely within flex-1 container */
+            position: absolute;
             top: 50%;
-            left: 50%; /* Position from the left edge, moving it right */
-            right: auto; /* Remove right positioning */
-            transform: translate(-50%, -50%); /* Keep centered relative to new left */
-            z-index: 1; /* Ensure loader is above placeholder but below image */
+            left: 50%;
+            right: auto;
+            transform: translate(-50%, -50%);
+            z-index: 1;
         }
         .ai-message img {
-            width: 250px; /* Set a fixed width for the image */
-            height: 250px; /* Set a fixed height for the image */
+            width: 250px;
+            height: 250px;
             object-fit: cover;
             border-radius: 8px;
             display: block;
-            position: absolute; /* Position relative within flex container */
+            position: absolute;
             top: 50%;
-            left: 50%; /* Position from the left edge, moving it right */
-            right: auto; /* Remove right positioning */
-            transform: translate(-50%, -50%); /* Keep centered relative to new left */
-            z-index: 2; /* Ensure image is above loader and placeholder */
+            left: 50%;
+            right: auto;
+            transform: translate(-50%, -50%);
+            z-index: 2;
         }
         .image-message {
             margin: 0;
@@ -348,6 +366,22 @@
         }
         .light-theme .image-message.error {
             color: #333333;
+            background-color: #e0e0e0;
+        }
+        .error-message {
+            color: #ff5555;
+            font-size: 14px;
+            text-align: left;
+            margin: 0;
+            max-width: 90%;
+            align-self: flex-start;
+            padding: 10px 15px;
+            background-color: #242628;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        .light-theme .error-message {
+            color: #cc0000;
             background-color: #e0e0e0;
         }
         .loading-icon {
@@ -546,267 +580,322 @@
         </button>
     </div>
 
-<script>
-    // Get the current host and protocol
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    const ws = new WebSocket(`${protocol}//${host}`);
-    
-    const messageContainer = document.getElementById('messageContainer');
-    const title = document.getElementById('title');
-    const inputContainer = document.getElementById('inputContainer');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const themeButton = document.getElementById('theme-button');
-    const userInput = document.getElementById('userInput');
-    const sendButton = document.querySelector('.circle-button');
+    <script>
+        // Get the current host and protocol
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host;
+        const ws = new WebSocket(`${protocol}//${host}`);
+        
+        const messageContainer = document.getElementById('messageContainer');
+        const title = document.getElementById('title');
+        const inputContainer = document.getElementById('inputContainer');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const themeButton = document.getElementById('theme-button');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.querySelector('.circle-button');
 
-    let messageSent = false;
-    let currentAiMessageDiv = null;
-    let isWaitingForResponse = false;
-    let isWaitingForImage = false;
+        let messageSent = false;
+        let currentAiMessageDiv = null;
+        let isWaitingForResponse = false;
+        let isWaitingForImage = false;
 
-    // Hide loader initially
-    const topLoader = document.querySelector('.header .loader');
-    if(topLoader) topLoader.style.display = 'none';
+        // Hide loader initially
+        const topLoader = document.querySelector('.header .loader');
+        if(topLoader) topLoader.style.display = 'none';
 
-    function disableInput() {
-        userInput.disabled = true;
-        sendButton.style.opacity = '0.5';
-        sendButton.style.cursor = 'not-allowed';
-    }
+        function disableInput() {
+            userInput.disabled = true;
+            sendButton.style.opacity = '0.5';
+            sendButton.style.cursor = 'not-allowed';
+        }
 
-    function enableInput() {
-        userInput.disabled = false;
-        sendButton.style.opacity = '1';
-        sendButton.style.cursor = 'pointer';
-    }
+        function enableInput() {
+            userInput.disabled = false;
+            sendButton.style.opacity = '1';
+            sendButton.style.cursor = 'pointer';
+        }
 
-    ws.onopen = () => {
-        console.log('Cooked By Omer AI🔥');
-    };
-
-    ws.onmessage = (event) => {
-        try {
-            const data = JSON.parse(event.data);
-
-            if (data.role === 'user') {
-                currentAiMessageDiv = null;
-                isWaitingForResponse = true;
-                disableInput();
-                scrollToBottom();
-
-            } else if (data.role === 'ai') {
-                let content = data.content;
-                let displayText = content;
-                let showLoading = false;
-
-                const promptIndex = content.indexOf('_prompt');
-                if (promptIndex !== -1) {
-                    displayText = content.substring(0, promptIndex).trim();
-                    showLoading = true;
-                    isWaitingForImage = true;
-
-                    // Create an AI message element for image generation status
-                    const aiMessageElement = document.createElement('div');
-                    aiMessageElement.className = 'message-bubble ai-message image-generating';
-                    aiMessageElement.innerHTML = `
-                        <div class="flex items-start gap-4">
-                          <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-blue-200 font-medium">B</div>
-                          <div class="flex-1">
-                            <div class="whitespace-pre-wrap text-sm">Generating image...</div>
-                            <div class="placeholder"></div>
-                            <div class="loader"></div>
-                          </div>
-                        </div>
-                    `;
-                    messageContainer.appendChild(aiMessageElement);
-                    setTimeout(scrollToBottom, 50);
-
-                }
-
-                if (displayText.length > 0 && !showLoading) {
-                    if (!currentAiMessageDiv) {
-                        currentAiMessageDiv = document.createElement('div');
-                        currentAiMessageDiv.className = 'ai-message';
-                        messageContainer.appendChild(currentAiMessageDiv);
-                    }
-                    currentAiMessageDiv.textContent += displayText;
-                    scrollToBottom();
-                }
-
-                if (!showLoading) {
-                    isWaitingForResponse = false;
-                    if (!isWaitingForImage) {
-                        enableInput();
-                    }
-                }
-
-            } else if (data.role === 'image') {
-                const aiMessageElements = messageContainer.querySelectorAll('.ai-message.image-generating');
-                const lastAiMessageElement = aiMessageElements[aiMessageElements.length - 1];
-
-                if (lastAiMessageElement) {
-                    const contentDiv = lastAiMessageElement.querySelector('.flex-1');
-                    if (contentDiv) {
-                        const loaderDiv = contentDiv.querySelector('.loader');
-                        const placeholderDiv = contentDiv.querySelector('.placeholder');
-                        contentDiv.innerHTML = '';
-                        if (placeholderDiv) {
-                            contentDiv.appendChild(placeholderDiv);
-                        }
-                        if (loaderDiv) {
-                            contentDiv.appendChild(loaderDiv);
-                        }
-
-                        const img = document.createElement('img');
-                        img.src = data.content;
-                        img.alt = '\u200B';
-                        Object.assign(img.style, {
-                            maxWidth: '100%',
-                            borderRadius: '8px',
-                            marginTop: '0',
-                            position: 'absolute',
-                            top: '50%',
-                            left: '75%',
-                            transform: 'translate(-50%, -50%)',
-                            zIndex: '2'
-                        });
-
-                        img.onclick = function() {
-                            const newWindow = window.open();
-                            newWindow.document.write(`
-                                <html>
-                                <head>
-                                    <title>Generated Image</title>
-                                    <style>
-                                        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
-                                        img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <img src="${data.content}" alt="\u200B">
-                                </body>
-                                </html>
-                            `);
-                        };
-                        img.style.cursor = 'pointer';
-
-                        img.onload = () => {
-                            if (placeholderDiv) {
-                                placeholderDiv.remove();
-                            }
-                            isWaitingForImage = false;
-                            if (!isWaitingForResponse) {
-                                enableInput();
-                            }
-                            scrollToBottom();
-                        };
-
-                        img.onerror = () => {
-                            contentDiv.textContent = 'Image failed to load!';
-                            lastAiMessageElement.classList.remove('image-generating');
-                            lastAiMessageElement.classList.add('image-error');
-                            if (placeholderDiv) {
-                                placeholderDiv.remove();
-                            }
-                            isWaitingForImage = false;
-                            if (!isWaitingForResponse) {
-                                enableInput();
-                            }
-                            scrollToBottom();
-                        };
-
-                        contentDiv.appendChild(img);
-                        lastAiMessageElement.classList.remove('image-generating');
-                    }
-                }
+        // Helper function to safely parse JSON
+        function tryParseJSON(data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return null;
             }
+        }
 
-            if (!messageSent && data.role !== 'image') {
-                messageSent = true;
-                title.classList.add('hidden');
-                inputContainer.classList.add('moved-down');
-                scrollToBottom();
-            }
-        } catch (error) {
+        // Display error message in UI
+        function displayErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            messageContainer.appendChild(errorDiv);
+            scrollToBottom();
             enableInput();
         }
-    };
 
-    function scrollToBottom() {
-        const messageContainer = document.getElementById('messageContainer');
-        messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: 'smooth' });
-    }
-
-    function sendMessage() {
-        if (isWaitingForResponse || isWaitingForImage) return;
-
-        const input = document.getElementById('userInput');
-        const message = input.value.trim();
-        if (!message) return;
-
-        const userMessage = message.replace(/\n+/g, ' ').trim();
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'user-message';
-        messageDiv.textContent = userMessage;
-        messageContainer.appendChild(messageDiv);
-
-        ws.send(userMessage);
-        input.value = '';
-        dropdownMenu.classList.remove('active');
-
-        const exampleButtons = document.getElementById('exampleButtons');
-        if (exampleButtons) {
-            exampleButtons.classList.add('hidden');
+        // Improved text formatting function
+        function formatText(text) {
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>'); // Code
+            text = text.replace(/\n/g, '<br>'); // Newlines
+            return text;
         }
 
-        setTimeout(scrollToBottom, 100);
-    }
+        ws.onopen = () => {
+            console.log('WebSocket Connected: Cake Baked By Omer AI🔥');
+        };
 
-    function useExamplePrompt(prompt) {
-        const input = document.getElementById('userInput');
-        input.value = prompt;
-        input.focus();
-    }
+        ws.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+            displayErrorMessage('WebSocket connection error. Please try again later.');
+        };
 
-    function toggleDropdown() {
-        dropdownMenu.classList.toggle('active');
-    }
+        ws.onclose = () => {
+            console.log('WebSocket Connection Closed');
+            displayErrorMessage('Connection closed. Please refresh the page.');
+        };
 
-    function newChat() {
-        messageContainer.innerHTML = '';
-        messageSent = false;
-        title.classList.remove('hidden');
-        inputContainer.classList.remove('moved-down');
-        const exampleButtons = document.getElementById('exampleButtons');
-        if (exampleButtons) {
-            exampleButtons.classList.remove('hidden');
+        ws.onmessage = (event) => {
+            console.log('Raw WebSocket data:', event.data, 'Type:', typeof event.data), 'Length:', event.data.length;
+            
+            if (typeof event.data !== 'string' || !event.data.trim()) {
+                console.warn('Received non-string or empty data:', event.data);
+                displayErrorMessage('Received invalid data from server.');
+                return;
+            }
+
+            // Handle common non-JSON messages
+            if (['Connected', 'Ping', 'Pong'].includes(event.data.trim())) {
+                console.log('Server status message:', event.data);
+                return;
+            }
+
+            const data = tryParseJSON(event.data);
+            if (!data) {
+                console.error('JSON Parse Error:', event.data);
+                displayErrorMessage('Received invalid JSON from server.');
+                return;
+            }
+
+            try {
+                if (data.role === 'user') {
+                    currentAiMessageDiv = null;
+                    isWaitingForResponse = true;
+                    disableInput();
+                    scrollToBottom();
+                } else if (data.role === 'ai') {
+                    let content = data.content;
+                    let displayText = content;
+                    let showLoading = false;
+
+                    const promptIndex = content.indexOf('_prompt');
+                    if (promptIndex !== -1) {
+                        displayText = content.substring(0, promptIndex).trim();
+                        showLoading = true;
+                        isWaitingForImage = true;
+
+                        const aiMessageElement = document.createElement('div');
+                        aiMessageElement.className = 'message-bubble ai-message image-generating';
+                        aiMessageElement.innerHTML = `
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-blue-200 font-medium">B</div>
+                                <div class="flex-1">
+                                    <div class="whitespace-pre-wrap text-sm">Loading...</div>
+                                    <div class="placeholder"></div>
+                                    <div class="loader"></div>
+                                </div>
+                            </div>
+                        `;
+                        messageContainer.appendChild(aiMessageElement);
+                        setTimeout(scrollToBottom, 300);
+                    }
+
+                    if (displayText.length > 0 && !showLoading) {
+                        if (!currentAiMessageDiv) {
+                            currentAiMessageDiv = document.createElement('div');
+                            currentAiMessageDiv.className = 'ai-message';
+                            messageContainer.appendChild(currentAiMessageDiv);
+                        }
+                        const formattedText = formatText(displayText);
+                        currentAiMessageDiv.innerHTML += formattedText;
+                        scrollToBottom();
+                    }
+
+                    if (!showLoading) {
+                        isWaitingForResponse = false;
+                        if (!isWaitingForImage) {
+                            enableInput();
+                        }
+                    }
+                } else if (data.role === 'image') {
+                    const aiMessageElements = messageContainer.querySelectorAll('.ai-message.image-generating');
+                    const lastAiMessageElement = aiMessageElements[aiMessageElements.length - 1];
+
+                    if (lastAiMessageElement) {
+                        const contentDiv = lastAiMessageElement.querySelector('.flex-1');
+                        if (contentDiv) {
+                            const loaderDiv = contentDiv.querySelector('.loader');
+                            const placeholderDiv = contentDiv.querySelector('.placeholder');
+                            contentDiv.innerHTML = '';
+                            if (placeholderDiv) {
+                                contentDiv.appendChild(placeholderDiv);
+                            }
+                            if (loaderDiv) {
+                                contentDiv.appendChild(loaderDiv);
+                            }
+
+                            const img = document.createElement('img');
+                            img.src = data.content;
+                            img.alt = '\u200B';
+                            Object.assign(img.style, {
+                                maxWidth: '100%',
+                                borderRadius: '8px',
+                                marginTop: '0',
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: '2'
+                            });
+
+                            img.onclick = function() {
+                                const newWindow = window.open();
+                                newWindow.document.write(`
+                                    <html>
+                                    <head>
+                                        <title>Generated Image</title>
+                                        <style>
+                                            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
+                                            img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <img src="${data.content}" alt="\u200B">
+                                    </body>
+                                    </html>
+                                `);
+                            };
+                            img.style.cursor = 'pointer';
+
+                            img.onload = () => {
+                                if (placeholderDiv) {
+                                    placeholderDiv.remove();
+                                }
+                                isWaitingForImage = false;
+                                if (!isWaitingForResponse) {
+                                    enableInput();
+                                }
+                                scrollToBottom();
+                            };
+
+                            img.onerror = () => {
+                                contentDiv.textContent = 'Image failed to load!';
+                                lastAiMessageElement.classList.remove('image-generating');
+                                lastAiMessageElement.classList.add('image-error');
+                                if (placeholderDiv) {
+                                    placeholderDiv.remove();
+                                }
+                                isWaitingForImage = false;
+                                if (!isWaitingForResponse) {
+                                    enableInput();
+                                }
+                                scrollToBottom();
+                            };
+
+                            contentDiv.appendChild(img);
+                            lastAiMessageElement.classList.remove('image-generating');
+                        }
+                    }
+                }
+
+                if (!messageSent && data.role !== 'image') {
+                    messageSent = true;
+                    title.classList.add('hidden');
+                    inputContainer.classList.add('moved-down');
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('Processing Error:', error.message, 'Data:', data);
+                displayErrorMessage('Error processing server response.');
+            }
+        };
+
+        function scrollToBottom() {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: 'smooth' });
         }
-        currentAiMessageDiv = null;
-        dropdownMenu.classList.remove('active');
-        scrollToBottom();
-    }
 
-    function toggleTheme() {
-        document.body.classList.toggle('light-theme');
-        const isLight = document.body.classList.contains('light-theme');
-        themeButton.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
-        dropdownMenu.classList.remove('active');
-    }
+        function sendMessage() {
+            if (isWaitingForResponse || isWaitingForImage) return;
 
-    document.getElementById('userInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !isWaitingForResponse && !isWaitingForImage) {
-            sendMessage();
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const userMessage = message.replace(/\n+/g, ' ').trim();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'user-message';
+            messageDiv.textContent = userMessage;
+            messageContainer.appendChild(messageDiv);
+
+            ws.send(userMessage);
+            input.value = '';
+            dropdownMenu.classList.remove('active');
+
+            const exampleButtons = document.getElementById('exampleButtons');
+            if (exampleButtons) {
+                exampleButtons.classList.add('hidden');
+            }
+
+            setTimeout(scrollToBottom, 100);
         }
-    });
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.profile-container')) {
+        function useExamplePrompt(prompt) {
+            const input = document.getElementById('userInput');
+            input.value = prompt;
+            input.focus();
+        }
+
+        function toggleDropdown() {
+            dropdownMenu.classList.toggle('active');
+        }
+
+        function newChat() {
+            messageContainer.innerHTML = '';
+            messageSent = false;
+            title.classList.remove('hidden');
+            inputContainer.classList.remove('moved-down');
+            const exampleButtons = document.getElementById('exampleButtons');
+            if (exampleButtons) {
+                exampleButtons.classList.remove('hidden');
+            }
+            currentAiMessageDiv = null;
+            dropdownMenu.classList.remove('active');
+            scrollToBottom();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeButton.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
             dropdownMenu.classList.remove('active');
         }
-    });
 
-    scrollToBottom();
-</script>
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isWaitingForResponse && !isWaitingForImage) {
+                sendMessage();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.profile-container')) {
+                dropdownMenu.classList.remove('active');
+            }
+        });
+
+        scrollToBottom();
+    </script>
 </body>
 </html>

@@ -23,6 +23,9 @@ const server = app.listen(port, () => {
 });
 const wss = new WebSocket.Server({ server });
 
+// Map to store conversation history for each WebSocket connection
+const conversationHistories = new Map();
+
 // Function to convert image URL to base64
 async function getBase64FromUrl(url) {
     return new Promise((resolve, reject) => {
@@ -52,24 +55,31 @@ async function getBase64FromUrl(url) {
 
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
+    console.log('Client connected');
+
+    // Initialize conversation history for this connection with the system prompt
+    const systemPromptPath = path.join(__dirname, 'system.txt');
+    const systemContent = fs.readFileSync(systemPromptPath, 'utf8');
+    const initialHistory = [{ role: 'system', content: systemContent }];
+    conversationHistories.set(ws, initialHistory);
+
     ws.on('message', async (message) => {
         try {
             const userMessage = message.toString('utf8');
             console.log('Received user message:', userMessage);
 
-            // Send user message back to client
-            ws.send(JSON.stringify({ role: 'user', content: userMessage }));
-
-            // Load system message from system.txt
-            const systemPromptPath = path.join(__dirname, 'system.txt');
-            const systemContent = fs.readFileSync(systemPromptPath, 'utf8');
+            // Get history for this connection and add the user message
+            const history = conversationHistories.get(ws);
+            if (!history) {
+                console.error('History not found for connection');
+                // Optionally send an error to the client or close the connection
+                return;
+            }
+            history.push({ role: 'user', content: userMessage });
 
             // Stream response from Cerebras
             const stream = await cerebras.chat.completions.create({
-                messages: [
-                    { role: 'system', content: systemContent },
-                    { role: 'user', content: userMessage }
-                ],
+                messages: history, // Send the full history
                 model: 'llama-3.3-70b',
                 stream: true,
                 max_completion_tokens: 2048,
@@ -109,6 +119,14 @@ wss.on('connection', (ws) => {
             // Send AI completion signal with prompt detection status
             ws.send(JSON.stringify({ role: 'ai_complete', promptDetected }));
 
+            // Add the full AI response to the history
+            if (fullResponse.length > 0) {
+                // Note: Cerebras API messages don't explicitly have 'ai' role, but this is our internal representation
+                // Use 'assistant' role for API compatibility
+                history.push({ role: 'assistant', content: fullResponse });
+                conversationHistories.set(ws, history); // Update the map with the new history
+            }
+
             // Check full response for image prompt
             console.log('Full response:', fullResponse);
             const promptMatch = fullResponse.match(/_?prompt: ?[^_]+_?/);
@@ -136,5 +154,17 @@ wss.on('connection', (ws) => {
             console.error('Error with Cerebras API or file:', error);
             ws.send(JSON.stringify({ role: 'ai', content: 'Sorry, I encountered an error, bro!' }));
         }
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        // Remove history for this connection when it closes
+        conversationHistories.delete(ws);
+    });
+
+    ws.on('error', (error) => {
+        console.error('WebSocket error:', error);
+        // Clean up history on error as well
+        conversationHistories.delete(ws);
     });
 });

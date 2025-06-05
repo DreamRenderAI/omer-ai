@@ -149,6 +149,8 @@
             transform: translateX(-50%);
             z-index: 10;
             transition: all 0.3s ease;
+            width: 90%;
+            max-width: 800px;
         }
         .light-theme .title {
             color: #333333;
@@ -167,9 +169,10 @@
             bottom: 35%;
             left: 50%;
             transform: translateX(-50%);
-            width: 100%;
+            width: 90%;
             max-width: 800px;
             padding: 0 20px;
+            flex-wrap: wrap;
         }
         .example-buttons.hidden {
             display: none;
@@ -226,6 +229,7 @@
             gap: 20px;
             padding-bottom: 150px;
             padding-top: 60px;
+            -webkit-overflow-scrolling: touch;
         }
         .user-message {
             color: white;
@@ -312,8 +316,10 @@
             z-index: 1;
         }
         .ai-message img {
-            width: 250px;
-            height: 250px;
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            aspect-ratio: 1;
             object-fit: cover;
             border-radius: 8px;
             display: block;
@@ -329,8 +335,9 @@
             max-width: 90%;
             align-self: flex-start;
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 100%;
+            max-width: 300px;
+            aspect-ratio: 1;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -450,7 +457,7 @@
             }
         }
         .input-container {
-            width: 100%;
+            width: 90%;
             max-width: 800px;
             height: 100px;
             background-color: #242628;
@@ -559,6 +566,159 @@
         .light-theme .circle-button {
             background-color: #333333;
             color: #ffffff;
+        }
+        @media (max-width: 768px) {
+            .title {
+                font-size: 24px;
+                top: 30%;
+            }
+            
+            .example-buttons {
+                bottom: 30%;
+                gap: 10px;
+            }
+            
+            .example-button {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+            
+            .input-container {
+                height: 90px;
+                border-radius: 20px;
+                padding: 12px;
+            }
+            
+            .input-text {
+                font-size: 15px;
+            }
+            
+            .message-container {
+                padding: 0 15px;
+                padding-bottom: 120px;
+            }
+            
+            .user-message, .ai-message {
+                font-size: 15px;
+                max-width: 95%;
+            }
+            
+            .ai-message .flex-1 {
+                min-height: 200px;
+                min-width: 200px;
+            }
+            
+            .ai-message .placeholder {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .ai-message img {
+                max-width: 200px;
+            }
+            
+            .image-message {
+                max-width: 95%;
+                max-width: 250px;
+            }
+            
+            .circle-button {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .circle-button img {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .think-button {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .think-button svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 20px;
+                top: 25%;
+            }
+            
+            .example-buttons {
+                bottom: 25%;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .example-button {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .input-container {
+                height: 80px;
+                border-radius: 15px;
+                padding: 10px;
+            }
+            
+            .input-text {
+                font-size: 14px;
+            }
+            
+            .message-container {
+                padding: 0 10px;
+                padding-bottom: 100px;
+            }
+            
+            .user-message, .ai-message {
+                font-size: 14px;
+                max-width: 100%;
+            }
+            
+            .ai-message .flex-1 {
+                min-height: 180px;
+                min-width: 180px;
+            }
+            
+            .ai-message .placeholder {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .ai-message img {
+                max-width: 180px;
+            }
+            
+            .image-message {
+                max-width: 100%;
+                max-width: 200px;
+            }
+            
+            .circle-button {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .circle-button img {
+                width: 16px;
+                height: 16px;
+            }
+            
+            .think-button {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .think-button svg {
+                width: 13px;
+                height: 13px;
+            }
         }
     </style>
 </head>

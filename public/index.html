@@ -175,40 +175,39 @@
             display: none;
         }
         .example-button {
-            background: linear-gradient(145deg, #2a2c2e, #242628);
+            background-color: #161618;
             color: #ffffff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 400;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             gap: 8px;
-            min-width: 160px;
+            min-width: unset;
             justify-content: center;
+            box-shadow: none;
         }
         .example-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(145deg, #2c2e30, #26282a);
+            transform: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            background-color: #1a1a1c;
         }
         .example-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transform: none;
         }
         .light-theme .example-button {
-            background: linear-gradient(145deg, #e8e8e8, #d8d8d8);
+            background-color: #ffffff;
             color: #333333;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.3);
         }
         .light-theme .example-button:hover {
-            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-color: rgba(0, 0, 0, 0.5);
+            background-color: #f0f0f0;
         }
         .button-icon {
             font-size: 16px;
@@ -476,17 +475,6 @@
             background-color: #e0e0e0;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
-        .input-label {
-            color: #d3d3d3;
-            font-size: 16px;
-            margin-bottom: 5px;
-            font-family: 'Inter', 'Inter Fallback', Arial, sans-serif;
-            font-weight: 400;
-            transition: color 0.3s ease;
-        }
-        .light-theme .input-label {
-            color: #333333;
-        }
         .input-text {
             color: #d3d3d3;
             font-size: 16px;
@@ -498,6 +486,9 @@
             font-family: 'Inter', 'Inter Fallback', Arial, sans-serif;
             font-weight: 400;
             transition: color 0.3s ease;
+            padding: 0 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
         .light-theme .input-text {
             color: #333333;
@@ -507,7 +498,38 @@
         }
         .button-group {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .think-button {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+        .think-button:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .light-theme .think-button {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        .light-theme .think-button:hover {
+            border-color: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .think-button svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
         }
         button {
             background: none;
@@ -557,9 +579,13 @@
     <div class="title" id="title">Bixx AI By Omer</div>
     <div class="message-container" id="messageContainer"></div>
     <div class="input-container" id="inputContainer">
-        <label class="input-label" for="userInput">Ask Bixx Anything</label>
-        <input type="text" class="input-text" id="userInput">
+        <input type="text" class="input-text" id="userInput" placeholder="Ask Bixx Anything">
         <div class="button-group">
+            <button class="think-button" onclick="toggleThinkMode()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+            </button>
             <button onclick="sendMessage()" class="circle-button">
                 <img src="up-arrow.png" alt="Send">
             </button>
@@ -644,37 +670,37 @@
         }
 
         ws.onopen = () => {
-            console.log('WebSocket Connected: Cake Baked By Omer AI🔥');
+            // console.log('WebSocket Connected: Cake Baked By Omer AI🔥');
         };
 
         ws.onerror = (error) => {
-            console.error('WebSocket Error:', error);
+            // console.error('WebSocket Error:', error);
             displayErrorMessage('WebSocket connection error. Please try again later.');
         };
 
         ws.onclose = () => {
-            console.log('WebSocket Connection Closed');
+            // console.log('WebSocket Connection Closed');
             displayErrorMessage('Connection closed. Please refresh the page.');
         };
 
         ws.onmessage = (event) => {
-            console.log('Raw WebSocket data:', event.data, 'Type:', typeof event.data), 'Length:', event.data.length;
+            // console.log('Raw WebSocket data:', event.data, 'Type:', typeof event.data), 'Length:', event.data.length;
             
             if (typeof event.data !== 'string' || !event.data.trim()) {
-                console.warn('Received non-string or empty data:', event.data);
+                // console.warn('Received non-string or empty data:', event.data);
                 displayErrorMessage('Received invalid data from server.');
                 return;
             }
 
             // Handle common non-JSON messages
             if (['Connected', 'Ping', 'Pong'].includes(event.data.trim())) {
-                console.log('Server status message:', event.data);
+                // console.log('Server status message:', event.data);
                 return;
             }
 
             const data = tryParseJSON(event.data);
             if (!data) {
-                console.error('JSON Parse Error:', event.data);
+                // console.error('JSON Parse Error:', event.data);
                 displayErrorMessage('Received invalid JSON from server.');
                 return;
             }
@@ -685,6 +711,12 @@
                     isWaitingForResponse = true;
                     disableInput();
                     scrollToBottom();
+                } else if (data.role === 'ai_start') {
+                    // Create a new div for the incoming AI message
+                    currentAiMessageDiv = document.createElement('div');
+                    currentAiMessageDiv.className = 'ai-message';
+                    messageContainer.appendChild(currentAiMessageDiv);
+                    scrollToBottom(); // Scroll down to show the new message bubble area
                 } else if (data.role === 'ai') {
                     let content = data.content;
                     let displayText = content;
@@ -696,6 +728,7 @@
                         showLoading = true;
                         isWaitingForImage = true;
 
+                        // Create a new div for the image message immediately
                         const aiMessageElement = document.createElement('div');
                         aiMessageElement.className = 'message-bubble ai-message image-generating';
                         aiMessageElement.innerHTML = `
@@ -709,18 +742,23 @@
                             </div>
                         `;
                         messageContainer.appendChild(aiMessageElement);
+                        // Note: Do NOT set currentAiMessageDiv = null here. currentAiMessageDiv is for text.
                         setTimeout(scrollToBottom, 300);
+
                     }
 
-                    if (displayText.length > 0 && !showLoading) {
-                        if (!currentAiMessageDiv) {
-                            currentAiMessageDiv = document.createElement('div');
-                            currentAiMessageDiv.className = 'ai-message';
-                            messageContainer.appendChild(currentAiMessageDiv);
-                        }
-                        const formattedText = formatText(displayText);
-                        currentAiMessageDiv.innerHTML += formattedText;
-                        scrollToBottom();
+                    // Handle text content if any
+                    if (displayText.length > 0) { 
+                         // If currentAiMessageDiv is null, create a new div for the start of a text message
+                         // Otherwise, append to the existing one.
+                         if (!currentAiMessageDiv) {
+                             currentAiMessageDiv = document.createElement('div');
+                             currentAiMessageDiv.className = 'ai-message';
+                             messageContainer.appendChild(currentAiMessageDiv);
+                         }
+                         const formattedText = formatText(displayText);
+                         currentAiMessageDiv.innerHTML += formattedText;
+                         scrollToBottom();
                     }
 
                     if (!showLoading) {
@@ -728,6 +766,13 @@
                         if (!isWaitingForImage) {
                             enableInput();
                         }
+                    }
+                } else if (data.role === 'ai_complete') {
+                    // Reset the current AI message div so the next message creates a new bubble
+                    currentAiMessageDiv = null;
+                    isWaitingForResponse = false; // Ensure input is re-enabled after AI completes (unless image is pending)
+                    if (!isWaitingForImage) {
+                        enableInput();
                     }
                 } else if (data.role === 'image') {
                     const aiMessageElements = messageContainer.querySelectorAll('.ai-message.image-generating');
@@ -817,7 +862,7 @@
                     scrollToBottom();
                 }
             } catch (error) {
-                console.error('Processing Error:', error.message, 'Data:', data);
+                // console.error('Processing Error:', error.message, 'Data:', data);
                 displayErrorMessage('Error processing server response.');
             }
         };
@@ -881,6 +926,11 @@
             const isLight = document.body.classList.contains('light-theme');
             themeButton.textContent = isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme';
             dropdownMenu.classList.remove('active');
+        }
+
+        function toggleThinkMode() {
+            // Add your think mode logic here
+            // console.log('Think mode toggled');
         }
 
         document.getElementById('userInput').addEventListener('keypress', (e) => {

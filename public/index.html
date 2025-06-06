@@ -846,7 +846,7 @@
         ws.onmessage = (event) => {
             // console.log('Raw WebSocket data:', event.data, 'Type:', typeof event.data), 'Length:', event.data.length;
             
-            if (typeof event.data !== 'string' || !event.data.trim()) {
+            if (typeof event.data !== 'string' || !event.data.trim ()) {
                 // console.warn('Received non-string or empty data:', event.data);
                 displayErrorMessage('Received invalid data from server.');
                 return;
@@ -888,23 +888,18 @@
                         showLoading = true;
                         isWaitingForImage = true;
 
-                        // Create a new div for the image message immediately
+                        // Create a new div for the image message without the avatar
                         const aiMessageElement = document.createElement('div');
-                        aiMessageElement.className = 'message-bubble ai-message image-generating';
+                        aiMessageElement.className = 'ai-message image-generating';
                         aiMessageElement.innerHTML = `
-                            <div class="flex items-start gap-4">
-                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-blue-200 font-medium">B</div>
-                                <div class="flex-1">
-                                    <div class="whitespace-pre-wrap text-sm">Loading...</div>
-                                    <div class="placeholder"></div>
-                                    <div class="loader"></div>
-                                </div>
+                            <div class="flex-1">
+                                <div class="whitespace-pre-wrap text-sm">Loading...</div>
+                                <div class="placeholder"></div>
+                                <div class="loader"></div>
                             </div>
                         `;
                         messageContainer.appendChild(aiMessageElement);
-                        // Note: Do NOT set currentAiMessageDiv = null here. currentAiMessageDiv is for text.
                         setTimeout(scrollToBottom, 300);
-
                     }
 
                     // Handle text content if any

@@ -773,6 +773,239 @@
                 height: 11px;
             }
         }
+
+        /* Profile Customization Modal Styles */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #242628;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .light-theme .modal-content {
+            background-color: #ffffff;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .light-theme .modal-title {
+            color: #333333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .light-theme .close-modal {
+            color: #333333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .light-theme .form-label {
+            color: #333333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background-color: #161618;
+            color: #ffffff;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .light-theme .form-input {
+            background-color: #f5f5f5;
+            border-color: #e0e0e0;
+            color: #333333;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .save-profile {
+            background-color: #4a9eff;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-profile:hover {
+            background-color: #357abd;
+        }
+
+        /* Code block styles */
+        .code-block {
+            margin: 16px 0;
+            position: relative;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .light-theme .code-block {
+            background-color: #f5f5f5;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 16px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #d4d4d4;
+            display: block;
+            white-space: pre;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            tab-size: 4;
+        }
+
+        .light-theme .code-block pre code {
+            color: #333333;
+        }
+
+        /* Copy button styles */
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 6px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .copy-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .light-theme .copy-button {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-color: rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .light-theme .copy-button:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-button i {
+            font-size: 14px;
+        }
+
+        .copy-button.copied {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        /* Language indicator */
+        .code-block::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #666;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 500;
+            z-index: 1;
+        }
+
+        .light-theme .code-block::before {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        /* Inline code styles */
+        .ai-message code:not(pre code) {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #d4d4d4;
+        }
+
+        .light-theme .ai-message code:not(pre code) {
+            background-color: rgba(0,0,0,0.1);
+            color: #333333;
+        }
     </style>
 </head>
 <body>
@@ -818,6 +1051,26 @@
             <i class="fas fa-brain button-icon"></i>
             Learn Something
         </button>
+    </div>
+
+    <div class="profile-modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customize Your Profile</h3>
+                <button class="close-modal" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <form id="profileForm" onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label class="form-label" for="userName">Your Name</label>
+                    <input type="text" id="userName" class="form-input" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="userOccupation">Your Occupation</label>
+                    <input type="text" id="userOccupation" class="form-input" placeholder="Enter your occupation">
+                </div>
+                <button type="submit" class="save-profile">Save Profile</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -876,10 +1129,42 @@
 
         // Improved text formatting function
         function formatText(text) {
+            // First, handle code blocks with language specification
+            text = text.replace(/```(\w+)\n([\s\S]*?)```/g, function(match, language, code) {
+                // Preserve indentation and trim only leading/trailing whitespace
+                const formattedCode = code.replace(/^[\s\u200B]+|[\s\u200B]+$/g, '');
+                return `<div class="code-block" data-language="${language}">
+                    <button class="copy-button" onclick="copyCode(this)">
+                        <i class="fas fa-copy"></i>
+                        Copy
+                    </button>
+                    <pre><code class="language-${language}">${formattedCode}</code></pre>
+                </div>`;
+            });
+            
+            // Then handle code blocks without language specification
+            text = text.replace(/```\n([\s\S]*?)```/g, function(match, code) {
+                // Preserve indentation and trim only leading/trailing whitespace
+                const formattedCode = code.replace(/^[\s\u200B]+|[\s\u200B]+$/g, '');
+                return `<div class="code-block" data-language="text">
+                    <button class="copy-button" onclick="copyCode(this)">
+                        <i class="fas fa-copy"></i>
+                        Copy
+                    </button>
+                    <pre><code>${formattedCode}</code></pre>
+                </div>`;
+            });
+            
+            // Handle inline code with single backticks
+            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Handle bold and italic
             text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
             text = text.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
-            text = text.replace(/`(.*?)`/g, '<code>$1</code>'); // Code
-            text = text.replace(/\n/g, '<br>'); // Newlines
+            
+            // Handle newlines
+            text = text.replace(/\n/g, '<br>');
+            
             return text;
         }
 
@@ -1223,6 +1508,76 @@
         });
 
         scrollToBottom();
+
+        // Profile Customization Functions
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.add('active');
+            // Load saved profile data if exists
+            const savedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            document.getElementById('userName').value = savedProfile.name || '';
+            document.getElementById('userOccupation').value = savedProfile.occupation || '';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+
+        function saveProfile(event) {
+            event.preventDefault();
+            const profile = {
+                name: document.getElementById('userName').value,
+                occupation: document.getElementById('userOccupation').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            
+            // Send to server via WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'profile_update',
+                    data: profile
+                }));
+            }
+            
+            closeProfileModal();
+        }
+
+        // Add click event listener to the profile customization button
+        document.addEventListener('DOMContentLoaded', function() {
+            const customizeButton = document.createElement('button');
+            customizeButton.className = 'dropdown-button';
+            customizeButton.innerHTML = '<i class="fas fa-user-edit"></i> Customize Profile';
+            customizeButton.onclick = openProfileModal;
+            
+            // Find the dropdown menu and insert the button
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            if (dropdownMenu) {
+                dropdownMenu.insertBefore(customizeButton, dropdownMenu.firstChild);
+            }
+        });
+
+        // Add copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('code').textContent;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(code).then(() => {
+                // Change button text temporarily
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('copied');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
     </script>
 </body>
 </html>

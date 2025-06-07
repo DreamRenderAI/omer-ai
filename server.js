@@ -68,6 +68,30 @@ wss.on('connection', (ws) => {
             const userMessage = message.toString('utf8');
             console.log('Received user message:', userMessage);
 
+            // Parse the message to check if it's a profile update
+            try {
+                const parsedMessage = JSON.parse(userMessage);
+                if (parsedMessage.type === 'profile_update') {
+                    // Store the profile data in the conversation history
+                    const history = conversationHistories.get(ws);
+                    if (history) {
+                        // Add or update the system message with profile information
+                        const profileInfo = `User Profile:\nName: ${parsedMessage.data.name}\nOccupation: ${parsedMessage.data.occupation}`;
+                        const systemMessageIndex = history.findIndex(msg => msg.role === 'system');
+                        if (systemMessageIndex !== -1) {
+                            history[systemMessageIndex].content = `${history[systemMessageIndex].content}\n\n${profileInfo}`;
+                        } else {
+                            history.unshift({ role: 'system', content: profileInfo });
+                        }
+                        conversationHistories.set(ws, history);
+                    }
+                    return; // Don't process this as a regular message
+                }
+            } catch (e) {
+                // If parsing fails, treat it as a regular message
+                console.log('Message is not JSON, treating as regular message');
+            }
+
             // Get history for this connection and add the user message
             const history = conversationHistories.get(ws);
             if (!history) {

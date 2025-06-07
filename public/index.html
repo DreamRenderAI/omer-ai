@@ -299,7 +299,7 @@
         .ai-message .placeholder {
             width: 250px;
             height: 250px;
-            background-color: #303133;
+            background: linear-gradient(45deg, #ffffff, #000000);
             border-radius: 8px;
             position: absolute;
             top: 50%;
@@ -307,16 +307,36 @@
             right: auto;
             transform: translate(-50%, -50%);
             z-index: 0;
+            opacity: 0.1;
+        }
+        .ai-message .placeholder.second {
+            left: calc(50% + 270px);
         }
         .ai-message .loader {
-            width: 80px;
-            aspect-ratio: 1;
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
             position: absolute;
             top: 50%;
             left: 50%;
-            right: auto;
             transform: translate(-50%, -50%);
             z-index: 1;
+        }
+        .ai-message .loader.second {
+            left: calc(50% + 270px);
+        }
+        @keyframes rotation {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
         }
         .ai-message img {
             width: 100%;
@@ -626,6 +646,12 @@
                 width: 200px;
                 height: 200px;
             }
+            .ai-message .placeholder.second {
+                left: calc(50% + 220px);
+            }
+            .ai-message .loader.second {
+                left: calc(50% + 220px);
+            }
             
             .ai-message img {
                 max-width: 200px;
@@ -707,6 +733,12 @@
             .ai-message .placeholder {
                 width: 180px;
                 height: 180px;
+            }
+            .ai-message .placeholder.second {
+                left: calc(50% + 200px);
+            }
+            .ai-message .loader.second {
+                left: calc(50% + 200px);
             }
             
             .ai-message img {
@@ -914,9 +946,10 @@
                         aiMessageElement.className = 'ai-message image-generating';
                         aiMessageElement.innerHTML = `
                             <div class="flex-1">
-                                <div class="whitespace-pre-wrap text-sm">Loading...</div>
                                 <div class="placeholder"></div>
+                                <div class="placeholder second"></div>
                                 <div class="loader"></div>
+                                <div class="loader second"></div>
                             </div>
                         `;
                         messageContainer.appendChild(aiMessageElement);
@@ -957,76 +990,143 @@
                     if (lastAiMessageElement) {
                         const contentDiv = lastAiMessageElement.querySelector('.flex-1');
                         if (contentDiv) {
-                            const loaderDiv = contentDiv.querySelector('.loader');
-                            const placeholderDiv = contentDiv.querySelector('.placeholder');
-                            contentDiv.innerHTML = '';
-                            if (placeholderDiv) {
-                                contentDiv.appendChild(placeholderDiv);
-                            }
-                            if (loaderDiv) {
-                                contentDiv.appendChild(loaderDiv);
-                            }
+                            const loaders = contentDiv.querySelectorAll('.loader');
+                            const placeholders = contentDiv.querySelectorAll('.placeholder');
+                            const images = contentDiv.querySelectorAll('img');
+                            
+                            // If this is the first image
+                            if (images.length === 0) {
+                                const img = document.createElement('img');
+                                img.src = data.content;
+                                img.alt = '\u200B';
+                                Object.assign(img.style, {
+                                    maxWidth: '100%',
+                                    borderRadius: '8px',
+                                    marginTop: '0',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    zIndex: '2'
+                                });
 
-                            const img = document.createElement('img');
-                            img.src = data.content;
-                            img.alt = '\u200B';
-                            Object.assign(img.style, {
-                                maxWidth: '100%',
-                                borderRadius: '8px',
-                                marginTop: '0',
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                zIndex: '2'
-                            });
+                                img.onclick = function() {
+                                    const newWindow = window.open();
+                                    newWindow.document.write(`
+                                        <html>
+                                        <head>
+                                            <title>Generated Image</title>
+                                            <style>
+                                                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
+                                                img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <img src="${data.content}" alt="\u200B">
+                                        </body>
+                                        </html>
+                                    `);
+                                };
+                                img.style.cursor = 'pointer';
 
-                            img.onclick = function() {
-                                const newWindow = window.open();
-                                newWindow.document.write(`
-                                    <html>
-                                    <head>
-                                        <title>Generated Image</title>
-                                        <style>
-                                            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
-                                            img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-                                        </style>
-                                    </head>
-                                    <body>
-                                        <img src="${data.content}" alt="\u200B">
-                                    </body>
-                                    </html>
-                                `);
-                            };
-                            img.style.cursor = 'pointer';
+                                img.onload = () => {
+                                    if (placeholders[0]) {
+                                        placeholders[0].remove();
+                                    }
+                                    if (loaders[0]) {
+                                        loaders[0].remove();
+                                    }
+                                    scrollToBottom();
+                                };
 
-                            img.onload = () => {
-                                if (placeholderDiv) {
-                                    placeholderDiv.remove();
-                                }
-                                isWaitingForImage = false;
-                                if (!isWaitingForResponse) {
-                                    enableInput();
-                                }
-                                scrollToBottom();
-                            };
+                                img.onerror = () => {
+                                    contentDiv.textContent = 'Image failed to load!';
+                                    lastAiMessageElement.classList.remove('image-generating');
+                                    lastAiMessageElement.classList.add('image-error');
+                                    if (placeholders[0]) {
+                                        placeholders[0].remove();
+                                    }
+                                    if (loaders[0]) {
+                                        loaders[0].remove();
+                                    }
+                                    isWaitingForImage = false;
+                                    if (!isWaitingForResponse) {
+                                        enableInput();
+                                    }
+                                    scrollToBottom();
+                                };
 
-                            img.onerror = () => {
-                                contentDiv.textContent = 'Image failed to load!';
+                                contentDiv.appendChild(img);
+                            } 
+                            // If this is the second image
+                            else if (images.length === 1) {
+                                const img = document.createElement('img');
+                                img.src = data.content;
+                                img.alt = '\u200B';
+                                Object.assign(img.style, {
+                                    maxWidth: '100%',
+                                    borderRadius: '8px',
+                                    marginTop: '0',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: 'calc(50% + 270px)',
+                                    transform: 'translate(-50%, -50%)',
+                                    zIndex: '2'
+                                });
+
+                                img.onclick = function() {
+                                    const newWindow = window.open();
+                                    newWindow.document.write(`
+                                        <html>
+                                        <head>
+                                            <title>Generated Image</title>
+                                            <style>
+                                                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #161618; }
+                                                img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <img src="${data.content}" alt="\u200B">
+                                        </body>
+                                        </html>
+                                    `);
+                                };
+                                img.style.cursor = 'pointer';
+
+                                img.onload = () => {
+                                    if (placeholders[1]) {
+                                        placeholders[1].remove();
+                                    }
+                                    if (loaders[1]) {
+                                        loaders[1].remove();
+                                    }
+                                    isWaitingForImage = false;
+                                    if (!isWaitingForResponse) {
+                                        enableInput();
+                                    }
+                                    scrollToBottom();
+                                };
+
+                                img.onerror = () => {
+                                    contentDiv.textContent = 'Second image failed to load!';
+                                    lastAiMessageElement.classList.remove('image-generating');
+                                    lastAiMessageElement.classList.add('image-error');
+                                    if (placeholders[1]) {
+                                        placeholders[1].remove();
+                                    }
+                                    if (loaders[1]) {
+                                        loaders[1].remove();
+                                    }
+                                    isWaitingForImage = false;
+                                    if (!isWaitingForResponse) {
+                                        enableInput();
+                                    }
+                                    scrollToBottom();
+                                };
+
+                                contentDiv.appendChild(img);
                                 lastAiMessageElement.classList.remove('image-generating');
-                                lastAiMessageElement.classList.add('image-error');
-                                if (placeholderDiv) {
-                                    placeholderDiv.remove();
-                                }
-                                isWaitingForImage = false;
-                                if (!isWaitingForResponse) {
-                                    enableInput();
-                                }
-                                scrollToBottom();
-                            };
-
-                            contentDiv.appendChild(img);
-                            lastAiMessageElement.classList.remove('image-generating');
+                            }
                         }
                     }
                 }
